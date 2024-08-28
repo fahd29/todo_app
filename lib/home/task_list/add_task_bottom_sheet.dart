@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo_app/app_colors.dart';
 import 'package:todo_app/firebase_utils.dart';
 import 'package:todo_app/model/task.dart';
+import 'package:todo_app/provider/app_theme_provider.dart';
+import 'package:todo_app/provider/auth_user_provider.dart';
 import 'package:todo_app/provider/list_provider.dart';
 
 class AddTaskBottomSheet extends StatefulWidget {
@@ -19,13 +22,17 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
   @override
   Widget build(BuildContext context) {
     listProvider = Provider.of<ListProvider>(context);
+    var ProviderTheme = Provider.of<AppThemeProvider>(context);
     return Container(
       margin: EdgeInsets.all(12),
       child: Column(
         children: [
           Text(
             "Add New Task",
-            style: Theme.of(context).textTheme.titleMedium,
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(color: AppColors.whiteColor),
           ),
           Form(
               key: formKey,
@@ -43,7 +50,12 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                     onChanged: (text) {
                       title = text;
                     },
-                    decoration: InputDecoration(hintText: 'Enter Task Title'),
+                    decoration: InputDecoration(
+                        hintText: 'Enter Task Title',
+                        hintStyle: TextStyle(
+                            color: ProviderTheme.isDarkMode()
+                                ? AppColors.whiteColor
+                                : AppColors.blackDarkColor)),
                   ),
                   SizedBox(
                     height: 10,
@@ -58,8 +70,11 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: 'Enter Task Descripation',
-                    ),
+                        hintText: 'Enter Task Descripation',
+                        hintStyle: TextStyle(
+                            color: ProviderTheme.isDarkMode()
+                                ? AppColors.whiteColor
+                                : AppColors.blackDarkColor)),
                     onChanged: (text) {
                       description = text;
                     },
@@ -70,7 +85,10 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                     child: Text(
                       'Select Date',
                       //textAlign: TextAlign.start,
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: ProviderTheme.isDarkMode()
+                              ? AppColors.whiteColor
+                              : AppColors.blackDarkColor),
                     ),
                   ),
                   Padding(
@@ -82,7 +100,10 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
                       child: Text(
                         '${selectedDate.day}/${selectedDate.month}/'
                         '${selectedDate.year}',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: ProviderTheme.isDarkMode()
+                                ? AppColors.whiteColor
+                                : AppColors.blackDarkColor),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -107,10 +128,16 @@ class _AddTaskBottomSheetState extends State<AddTaskBottomSheet> {
       Task task =
           Task(title: title, description: description, dateTime: selectedDate);
 
-      FireBaseUtils.addTaskToFireStore(task).timeout(Duration(seconds: 1),
-          onTimeout: () {
+      var authProvider = Provider.of<AuthUserProvider>(context, listen: false);
+      FireBaseUtils.addTaskToFireStore(task, authProvider.currentUser!.id!)
+          .then((value) {
         print('task added sucessfully');
-        listProvider.getAllTasksFromFirestore();
+        listProvider.getAllTasksFromFirestore(authProvider.currentUser!.id!);
+
+        Navigator.pop(context);
+      }).timeout(Duration(seconds: 1), onTimeout: () {
+        print('task added sucessfully');
+        listProvider.getAllTasksFromFirestore(authProvider.currentUser!.id!);
 
         Navigator.pop(context);
       });
