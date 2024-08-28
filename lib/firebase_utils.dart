@@ -46,4 +46,8 @@ class FireBaseUtils {
   static Future<void> editIsDone({required String uId, required Task task}) {
     return getTasksCollection(uId).doc(task.id).update({'isDone': task.isDone});
   }
+
+  static Future<void> editTask({required String uId, required Task task}) {
+    return getTasksCollection(uId).doc(task.id).update(task.toFireStore());
+  }
 }

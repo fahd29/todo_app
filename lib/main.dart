@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:todo_app/auth/login/login_screen.dart';
 import 'package:todo_app/auth/register/register_screen.dart';
 import 'package:todo_app/home/home_screen.dart';
+import 'package:todo_app/home/task_list/edit_task_screen.dart';
 import 'package:todo_app/my_theme_data.dart';
 import 'package:todo_app/provider/app_config_provider.dart';
 import 'package:todo_app/provider/app_theme_provider.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     var provider = Provider.of<AppConfigProvider>(context);
     var providerTheme = Provider.of<AppThemeProvider>(context);
+    providerTheme.loadTheme();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: LoginScreen.routeName,
@@ -51,6 +53,7 @@ class MyApp extends StatelessWidget {
         HomeScreen.routeName: (context) => HomeScreen(),
         RegisterScreen.routeName: (context) => RegisterScreen(),
         LoginScreen.routeName: (context) => LoginScreen(),
+        EditTaskScreen.routeName: (context) => EditTaskScreen(),
       },
       theme: MyThemeData.lightTheme,
       themeMode: providerTheme.appTheme,
